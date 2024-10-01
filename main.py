@@ -20,4 +20,5 @@ celery_app = Celery("tasks", broker=redis_url)
 def add_task(data: dict):
     # Send task to Celery
     task = celery_app.send_task("tasks.generate_report", args=[data["task_data"]])
+    print(f"Task sent to Celery: {data}")
     return {"status": "Task sent to Celery", "task_id": task.id}
