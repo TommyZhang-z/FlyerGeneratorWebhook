@@ -26,6 +26,10 @@ def add_task(data: dict):
     address = data["address"]
     lot = data["lot"]
     price = data["price"]
+    land_size = data["land_size"]
+    house_size = data["house_size"]
+    lot_width = data["lot_width"]
+    land_price = data["land_price"]
     rego = data["rego"]
     facade = data["facade"]
     floorplan = data["floorplan"]
@@ -43,6 +47,10 @@ def add_task(data: dict):
             address,
             lot,
             price,
+            land_size,
+            house_size,
+            lot_width,
+            land_price,
             rego,
             facade,
             floorplan,
