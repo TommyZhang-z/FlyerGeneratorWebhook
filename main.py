@@ -17,49 +17,19 @@ app = FastAPI()
 celery_app = Celery("tasks", broker=redis_url)
 
 
-@app.post("/add-task/")
+@app.post("/add-tasks/")
 def add_task(data: dict):
-    # Send task to Celery
-    # ID	Suburb	Address	Lot	Price	Rego	Facade	FloorPlan	Facade File	Floorplan File	Bedroom	Bathroom	Parking Slot
-    flyer_id = data["flyer_id"]
-    suburb = data["suburb"]
-    address = data["address"]
-    lot = data["lot"]
-    price = data["price"]
-    land_size = data["land_size"]
-    house_size = data["house_size"]
-    lot_width = data["lot_width"]
-    land_price = data["land_price"]
-    rego = data["rego"]
-    facade = data["facade"]
-    floorplan = data["floorplan"]
-    facade_file = data["facade_file"]
-    floorplan_file = data["floorplan_file"]
-    bedroom = data["bedroom"]
-    bathroom = data["bathroom"]
-    parking_slot = data["parking_slot"]
-
-    task = celery_app.send_task(
-        "tasks.generate_flyer",
-        args=[
-            flyer_id,
-            suburb,
-            address,
-            lot,
-            price,
-            land_size,
-            house_size,
-            lot_width,
-            land_price,
-            rego,
-            facade,
-            floorplan,
-            facade_file,
-            floorplan_file,
-            bedroom,
-            bathroom,
-            parking_slot,
-        ],
-    )
-    logging.info(f"Task sent to Celery: {data}")
-    return {"status": "Task sent to Celery", "task_id": task.id}
+    celery_tasks = {}
+    for task in data["tasks"]:
+        try:
+            flyer_id = task[0]
+            created_task = celery_app.send_task(
+                "tasks.generate_flyer",
+                args=[*task],
+            )
+            celery_tasks[flyer_id] = created_task.id
+            logging.info(f"Task sent to Celery: {created_task}")
+        except Exception as e:
+            celery_tasks[flyer_id] = None
+            logging.error(f"Error sending task to Celery: {e}")
+    return {"status": "All Task sent to Celery", "tasks": celery_tasks}
